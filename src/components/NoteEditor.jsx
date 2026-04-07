@@ -1,3 +1,43 @@
-export default function NoteEditor() {
-  return <></>;
+export default function NoteEditor({
+  draftNote,
+  onChangeDraft,
+  onSaveNote,
+  onAddNote,
+  onDeleteNote,
+}) {
+  const handleChange = () => {};
+
+  return (
+    <form>
+      <header>
+        <select
+          name='category'
+          value={draftNote.category}
+          onChange={handleChange}
+        >
+          <option value='all'>전체</option>
+          <option value='work'>업무</option>
+          <option value='personal'>개인</option>
+          <option value='etc'>기타</option>
+        </select>
+        <input
+          type='text'
+          name='title'
+          value={draftNote.title}
+          onChange={handleChange}
+          placeholder='제목'
+        />
+      </header>
+      <textarea
+        name='content'
+        value={draftNote.content}
+        onChange={handleChange}
+        placeholder='내용'
+      ></textarea>
+      <footer>
+        <button>저장</button>
+        <button>삭제</button>
+      </footer>
+    </form>
+  );
 }

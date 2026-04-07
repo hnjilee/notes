@@ -64,13 +64,15 @@ export default function NotePage() {
         onSelectNote={handleSelectNote}
         selectedCategory={selectedCategory}
       />
-      <NoteEditor
-        draftNote={draftNote}
-        onChangeDraft={handleChangeDraft}
-        onSaveNote={handleSaveNote}
-        onAddNote={handleAddNote}
-        onDeleteNote={handleDeleteNote}
-      />
+      {draftNote && (
+        <NoteEditor
+          draftNote={draftNote}
+          onChangeDraft={handleChangeDraft}
+          onSaveNote={handleSaveNote}
+          onAddNote={handleAddNote}
+          onDeleteNote={handleDeleteNote}
+        />
+      )}
       <CategoryFilter
         selectedCategory={selectedCategory}
         onChangeCategory={setSelectedCategory}
