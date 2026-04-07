@@ -1,5 +1,7 @@
+import NotePage from './pages/NotePage';
+
 function App() {
-  return <>Hello</>;
+  return <NotePage />;
 }
 
 export default App;
