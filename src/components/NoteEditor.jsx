@@ -2,7 +2,6 @@ export default function NoteEditor({
   draftNote,
   onChangeDraft,
   onSaveNote,
-  onAddNote,
   onDeleteNote,
 }) {
   const handleChange = e => {

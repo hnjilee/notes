@@ -65,6 +65,7 @@ export default function NotePage() {
         notes={notes}
         selectedNoteId={selectedNoteId}
         onSelectNote={handleSelectNote}
+        onClickAddBtn={handleAddNote}
         selectedCategory={selectedCategory}
       />
       {draftNote && (
@@ -72,7 +73,6 @@ export default function NotePage() {
           draftNote={draftNote}
           onChangeDraft={handleChangeDraft}
           onSaveNote={handleSaveNote}
-          onAddNote={handleAddNote}
           onDeleteNote={handleDeleteNote}
         />
       )}

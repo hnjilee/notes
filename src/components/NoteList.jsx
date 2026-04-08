@@ -2,13 +2,14 @@ export default function NoteList({
   notes,
   selectedNoteId,
   onSelectNote,
+  onClickAddBtn,
   selectedCategory,
 }) {
   return (
     <>
       <header>
         <h1>노트 목록</h1>
-        <button>추가</button>
+        <button onClick={onClickAddBtn}>추가</button>
       </header>
       <ul>
         {notes.map(({ id, category, title, content }) => (
