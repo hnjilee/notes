@@ -22,21 +22,24 @@ export default function NotePage() {
     setDraftNote({ ...notes.find(note => note.id === id) });
   };
 
-  const handleChangeDraft = draft => {
-    setDraftNote(draft);
-  };
+  // Editor/Page의 책임 분리 위해 상위에서 draft 완성
+  const handleChangeDraft = patch =>
+    setDraftNote(prev => ({ ...prev, ...patch }));
 
+  // stale state 방지 위해 함수형 업데이트 적용
   const handleSaveNote = () => {
     if (selectedNoteId === null) {
       // add
-      setNotes([...notes, draftNote]);
+      setNotes(prev => [...prev, draftNote]);
     } else {
       // update
-      const updated = notes.map(note =>
-        note.id === draftNote.id ? draftNote : note,
+      setNotes(prev =>
+        prev.map(note => (note.id === draftNote.id ? draftNote : note)),
       );
-      setNotes(updated);
     }
+
+    setSelectedNoteId(null);
+    setDraftNote(null);
   };
 
   const handleAddNote = () => {

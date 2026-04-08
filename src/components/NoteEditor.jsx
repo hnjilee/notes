@@ -5,7 +5,15 @@ export default function NoteEditor({
   onAddNote,
   onDeleteNote,
 }) {
-  const handleChange = () => {};
+  const handleChange = e => {
+    const { name, value } = e.target;
+    onChangeDraft({ [name]: value });
+  };
+
+  const handleSave = e => {
+    e.preventDefault();
+    onSaveNote();
+  };
 
   return (
     <form>
@@ -35,8 +43,8 @@ export default function NoteEditor({
         placeholder='내용'
       ></textarea>
       <footer>
-        <button>저장</button>
-        <button>삭제</button>
+        <button onClick={handleSave}>저장</button>
+        <button type='button'>삭제</button>
       </footer>
     </form>
   );
