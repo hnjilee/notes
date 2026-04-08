@@ -53,8 +53,9 @@ export default function NotePage() {
     });
   };
 
+  // stale state 방지 위해 함수형 업데이트 적용
   const handleDeleteNote = () => {
-    setNotes(notes.filter(note => note.id !== selectedNoteId));
+    setNotes(prev => prev.filter(note => note.id !== selectedNoteId));
     setSelectedNoteId(null);
     setDraftNote(null);
   };

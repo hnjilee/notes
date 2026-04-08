@@ -43,7 +43,9 @@ export default function NoteEditor({
       ></textarea>
       <footer>
         <button onClick={handleSave}>저장</button>
-        <button type='button'>삭제</button>
+        <button type='button' onClick={onDeleteNote}>
+          삭제
+        </button>
       </footer>
     </form>
   );
