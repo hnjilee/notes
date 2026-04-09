@@ -22,7 +22,7 @@ export default function NoteEditor({
           value={draftNote.category}
           onChange={handleChange}
         >
-          <option value='all'>전체</option>
+          <option value=''>카테고리</option>
           <option value='work'>업무</option>
           <option value='personal'>개인</option>
           <option value='etc'>기타</option>

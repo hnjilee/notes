@@ -3,7 +3,6 @@ export default function NoteList({
   selectedNoteId,
   onSelectNote,
   onClickAddBtn,
-  selectedCategory,
 }) {
   return (
     <>

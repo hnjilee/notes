@@ -1,7 +1,7 @@
 import { useState } from 'react';
-import NoteList from '../components/NoteList';
-import NoteEditor from '../components/NoteEditor';
-import CategoryFilter from '../components/CategoryFilter';
+import NoteList from '../components/NoteList.jsx';
+import NoteEditor from '../components/NoteEditor.jsx';
+import CategoryFilter from '../components/CategoryFilter.jsx';
 
 export default function NotePage() {
   const [notes, setNotes] = useState([
@@ -14,7 +14,27 @@ export default function NotePage() {
 
   const [draftNote, setDraftNote] = useState(null);
 
-  const [selectedCategory, setSelectedCategory] = useState('all');
+  const [selectedCategory, setSelectedCategory] = useState('ALL');
+
+  // Page에서 계산해서 전달
+  // List는 "렌더링 책임만"
+  // 파생 상태 중복 X
+  const filteredNotes = notes.filter(note => {
+    if (selectedCategory === 'ALL') return true;
+    return note.category === selectedCategory;
+  });
+
+  // 하드코딩 제거 위해 notes로부터 동적으로 생성
+  // 빈 값 포함되지 않도록 필터링 추가 (데이터 오염 시 UI도 망가짐)
+  // 'ALL'은 항상 포함 (데이터 X, 별도의 제어값)
+  const categories = Array.from(
+    new Set([
+      'ALL',
+      ...notes //
+        .map(note => note.category)
+        .filter(category => category !== ''),
+    ]),
+  );
 
   const handleSelectNote = id => {
     setSelectedNoteId(id);
@@ -62,12 +82,16 @@ export default function NotePage() {
 
   return (
     <>
+      <CategoryFilter
+        categories={categories}
+        selectedCategory={selectedCategory}
+        onChangeCategory={setSelectedCategory}
+      />
       <NoteList
-        notes={notes}
+        notes={filteredNotes}
         selectedNoteId={selectedNoteId}
         onSelectNote={handleSelectNote}
         onClickAddBtn={handleAddNote}
-        selectedCategory={selectedCategory}
       />
       {draftNote && (
         <NoteEditor
@@ -77,10 +101,6 @@ export default function NotePage() {
           onDeleteNote={handleDeleteNote}
         />
       )}
-      <CategoryFilter
-        selectedCategory={selectedCategory}
-        onChangeCategory={setSelectedCategory}
-      />
     </>
   );
 }
