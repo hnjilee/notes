@@ -48,6 +48,13 @@ export default function NotePage() {
 
   // stale state 방지 위해 함수형 업데이트 적용
   const handleSaveNote = () => {
+    // 데이터 무결성 위해 category: '' 저장 차단
+    // 빈 문자열 + 공백 방지
+    if (!draftNote.category.trim()) {
+      alert('카테고리를 선택해주세요');
+      return;
+    }
+
     if (selectedNoteId === null) {
       // add
       setNotes(prev => [...prev, draftNote]);
