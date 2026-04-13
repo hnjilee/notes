@@ -1,20 +1,22 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import NoteList from '../components/NoteList.jsx';
 import NoteEditor from '../components/NoteEditor.jsx';
 import CategoryFilter from '../components/CategoryFilter.jsx';
+import { createNote, deleteNote, getNotes, updateNote } from '../api/notes.js';
 
 export default function NotePage() {
-  const [notes, setNotes] = useState([
-    { id: 1, category: 'work', title: 'note1', content: 'note1' },
-    { id: 2, category: 'personal', title: 'note2', content: 'note2' },
-    { id: 3, category: 'etc', title: 'note3', content: 'note3' },
-  ]);
+  const [notes, setNotes] = useState([]);
 
   const [selectedNoteId, setSelectedNoteId] = useState(null);
 
   const [draftNote, setDraftNote] = useState(null);
 
   const [selectedCategory, setSelectedCategory] = useState('ALL');
+
+  // mount 시 한 번만 호출
+  useEffect(() => {
+    getNotes().then(setNotes);
+  }, []);
 
   // Page에서 계산해서 전달
   // List는 "렌더링 책임만"
@@ -47,7 +49,7 @@ export default function NotePage() {
     setDraftNote(prev => ({ ...prev, ...patch }));
 
   // stale state 방지 위해 함수형 업데이트 적용
-  const handleSaveNote = () => {
+  const handleSaveNote = async () => {
     // 데이터 무결성 위해 category: '' 저장 차단
     // 빈 문자열 + 공백 방지
     if (!draftNote.category.trim()) {
@@ -57,11 +59,15 @@ export default function NotePage() {
 
     if (selectedNoteId === null) {
       // add
-      setNotes(prev => [...prev, draftNote]);
+      const created = await createNote(draftNote);
+      if (!created) return;
+      setNotes(prev => [...prev, created]);
     } else {
       // update
+      const updated = await updateNote(draftNote);
+      if (!updated) return;
       setNotes(prev =>
-        prev.map(note => (note.id === draftNote.id ? draftNote : note)),
+        prev.map(note => (note.id === updated.id ? updated : note)),
       );
     }
 
@@ -72,8 +78,9 @@ export default function NotePage() {
   const handleAddNote = () => {
     // Save 로직과 일관성 유지
     setSelectedNoteId(null);
+
+    // id 생성은 API에서 담당
     setDraftNote({
-      id: crypto.randomUUID(),
       category: '',
       title: '',
       content: '',
@@ -81,7 +88,8 @@ export default function NotePage() {
   };
 
   // stale state 방지 위해 함수형 업데이트 적용
-  const handleDeleteNote = () => {
+  const handleDeleteNote = async () => {
+    await deleteNote(selectedNoteId);
     setNotes(prev => prev.filter(note => note.id !== selectedNoteId));
     setSelectedNoteId(null);
     setDraftNote(null);
