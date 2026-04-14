@@ -5,19 +5,32 @@ let mockNotes = [
 ];
 
 export async function getNotes() {
-  return Promise.resolve([...mockNotes]);
+  await delay(1000);
+
+  // 에러 UI 테스트 목적
+  if (Math.random() < 0.3) {
+    throw new Error('random error - failed to get data');
+  }
+
+  return [...mockNotes];
 }
 
 export async function createNote(note) {
+  await delay(500);
+
   const newNote = {
     ...note,
     id: crypto.randomUUID(),
   };
   mockNotes.push(newNote);
-  return Promise.resolve(newNote);
+
+  return newNote;
+  // throw new Error('failed to save data');
 }
 
 export async function updateNote(updatedNote) {
+  await delay(500);
+
   // 대상 존재 여부 체크
   const exists = mockNotes.some(note => note.id === updatedNote.id);
 
@@ -29,10 +42,14 @@ export async function updateNote(updatedNote) {
   mockNotes = mockNotes.map(note =>
     note.id === updatedNote.id ? updatedNote : note,
   );
-  return Promise.resolve(updatedNote);
+
+  return updatedNote;
+  // throw new Error('failed to update data');
 }
 
 export async function deleteNote(id) {
+  await delay(500);
+
   // 대상 존재 여부 체크
   const exists = mockNotes.some(note => note.id === id);
 
@@ -42,5 +59,12 @@ export async function deleteNote(id) {
   }
 
   mockNotes = mockNotes.filter(note => note.id !== id);
-  return Promise.resolve(id);
+
+  return id;
+  // throw new Error('failed to delete data');
+}
+
+// 로딩 UI 테스트 목적
+function delay(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
 }

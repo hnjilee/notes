@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import NoteList from '../components/NoteList.jsx';
 import NoteEditor from '../components/NoteEditor.jsx';
 import CategoryFilter from '../components/CategoryFilter.jsx';
@@ -6,16 +6,29 @@ import { createNote, deleteNote, getNotes, updateNote } from '../api/notes.js';
 
 export default function NotePage() {
   const [notes, setNotes] = useState([]);
-
   const [selectedNoteId, setSelectedNoteId] = useState(null);
-
   const [draftNote, setDraftNote] = useState(null);
-
   const [selectedCategory, setSelectedCategory] = useState('ALL');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+
+  const didFetch = useRef(false);
 
   // mount 시 한 번만 호출
   useEffect(() => {
-    getNotes().then(setNotes);
+    setLoading(true);
+    setError(null);
+
+    // 개발 시 StrictMode로 인한 API 중복 호출 때문에
+    // 데이터 요청 성공과 에러 발생이 동시에 생기는 상황 방지 위해
+    // 임시로 추가
+    if (didFetch.current) return;
+    didFetch.current = true;
+
+    getNotes() //
+      .then(setNotes)
+      .catch(err => setError(err.message))
+      .finally(() => setLoading(false));
   }, []);
 
   // Page에서 계산해서 전달
@@ -57,22 +70,29 @@ export default function NotePage() {
       return;
     }
 
-    if (selectedNoteId === null) {
-      // add
-      const created = await createNote(draftNote);
-      if (!created) return;
-      setNotes(prev => [...prev, created]);
-    } else {
-      // update
-      const updated = await updateNote(draftNote);
-      if (!updated) return;
-      setNotes(prev =>
-        prev.map(note => (note.id === updated.id ? updated : note)),
-      );
-    }
+    try {
+      setLoading(true);
+      setError(null);
 
-    setSelectedNoteId(null);
-    setDraftNote(null);
+      if (selectedNoteId === null) {
+        // add
+        const created = await createNote(draftNote);
+        setNotes(prev => [...prev, created]);
+      } else {
+        // update
+        const updated = await updateNote(draftNote);
+        setNotes(prev =>
+          prev.map(note => (note.id === updated.id ? updated : note)),
+        );
+      }
+
+      setSelectedNoteId(null);
+      setDraftNote(null);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleAddNote = () => {
@@ -89,14 +109,26 @@ export default function NotePage() {
 
   // stale state 방지 위해 함수형 업데이트 적용
   const handleDeleteNote = async () => {
-    await deleteNote(selectedNoteId);
-    setNotes(prev => prev.filter(note => note.id !== selectedNoteId));
-    setSelectedNoteId(null);
-    setDraftNote(null);
+    try {
+      setLoading(true);
+      setError(null);
+
+      await deleteNote(selectedNoteId);
+      setNotes(prev => prev.filter(note => note.id !== selectedNoteId));
+
+      setSelectedNoteId(null);
+      setDraftNote(null);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
     <>
+      {loading && <p>로딩 중...</p>}
+      {error && <p style={{ color: 'red' }}>{error}</p>}
       <CategoryFilter
         categories={categories}
         selectedCategory={selectedCategory}
