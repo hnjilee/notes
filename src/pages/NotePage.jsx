@@ -9,14 +9,19 @@ export default function NotePage() {
   const [selectedNoteId, setSelectedNoteId] = useState(null);
   const [draftNote, setDraftNote] = useState(null);
   const [selectedCategory, setSelectedCategory] = useState('ALL');
-  const [loading, setLoading] = useState(false);
+  // 비동기 작업별 UI 반영 위해 작업 단위로 상태 분리
+  const [loading, setLoading] = useState({
+    fetch: false,
+    save: false,
+    delete: false,
+  });
   const [error, setError] = useState(null);
 
   const didFetch = useRef(false);
 
   // mount 시 한 번만 호출
   useEffect(() => {
-    setLoading(true);
+    setLoading(prev => ({ ...prev, fetch: true }));
     setError(null);
 
     // 개발 시 StrictMode로 인한 API 중복 호출 때문에
@@ -28,7 +33,7 @@ export default function NotePage() {
     getNotes() //
       .then(setNotes)
       .catch(err => setError(err.message))
-      .finally(() => setLoading(false));
+      .finally(() => setLoading(prev => ({ ...prev, fetch: false })));
   }, []);
 
   // Page에서 계산해서 전달
@@ -71,7 +76,7 @@ export default function NotePage() {
     }
 
     try {
-      setLoading(true);
+      setLoading(prev => ({ ...prev, save: true }));
       setError(null);
 
       if (selectedNoteId === null) {
@@ -91,7 +96,7 @@ export default function NotePage() {
     } catch (err) {
       setError(err.message);
     } finally {
-      setLoading(false);
+      setLoading(prev => ({ ...prev, save: false }));
     }
   };
 
@@ -110,7 +115,7 @@ export default function NotePage() {
   // stale state 방지 위해 함수형 업데이트 적용
   const handleDeleteNote = async () => {
     try {
-      setLoading(true);
+      setLoading(prev => ({ ...prev, delete: true }));
       setError(null);
 
       await deleteNote(selectedNoteId);
@@ -121,13 +126,13 @@ export default function NotePage() {
     } catch (err) {
       setError(err.message);
     } finally {
-      setLoading(false);
+      setLoading(prev => ({ ...prev, delete: false }));
     }
   };
 
   return (
     <>
-      {loading && <p>로딩 중...</p>}
+      {loading.fetch && <div className='overlay'>로딩 중...</div>}
       {error && <p style={{ color: 'red' }}>{error}</p>}
       <CategoryFilter
         categories={categories}
@@ -143,6 +148,7 @@ export default function NotePage() {
       {draftNote && (
         <NoteEditor
           draftNote={draftNote}
+          loading={loading}
           onChangeDraft={handleChangeDraft}
           onSaveNote={handleSaveNote}
           onDeleteNote={handleDeleteNote}

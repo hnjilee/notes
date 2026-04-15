@@ -1,5 +1,6 @@
 export default function NoteEditor({
   draftNote,
+  loading,
   onChangeDraft,
   onSaveNote,
   onDeleteNote,
@@ -42,9 +43,11 @@ export default function NoteEditor({
         placeholder='내용'
       ></textarea>
       <footer>
-        <button onClick={handleSave}>저장</button>
-        <button type='button' onClick={onDeleteNote}>
-          삭제
+        <button disabled={loading.save} onClick={handleSave}>
+          {loading.save ? '저장 중...' : '저장'}
+        </button>
+        <button type='button' disabled={loading.delete} onClick={onDeleteNote}>
+          {loading.delete ? '삭제 중...' : '삭제'}
         </button>
       </footer>
     </form>
