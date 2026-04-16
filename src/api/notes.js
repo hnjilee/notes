@@ -8,7 +8,7 @@ export async function getNotes() {
   await delay(1000);
 
   // 에러 UI 테스트 목적
-  if (Math.random() < 0.3) {
+  if (Math.random() < 0.1) {
     throw new Error('random error - failed to get data');
   }
 
@@ -16,7 +16,7 @@ export async function getNotes() {
 }
 
 export async function createNote(note) {
-  await delay(500);
+  await delay(1000);
 
   const newNote = {
     ...note,
@@ -29,7 +29,7 @@ export async function createNote(note) {
 }
 
 export async function updateNote(updatedNote) {
-  await delay(500);
+  await delay(1000);
 
   // 대상 존재 여부 체크
   const exists = mockNotes.some(note => note.id === updatedNote.id);
@@ -48,7 +48,7 @@ export async function updateNote(updatedNote) {
 }
 
 export async function deleteNote(id) {
-  await delay(500);
+  await delay(1000);
 
   // 대상 존재 여부 체크
   const exists = mockNotes.some(note => note.id === id);

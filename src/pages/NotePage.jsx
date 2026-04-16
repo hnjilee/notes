@@ -75,26 +75,53 @@ export default function NotePage() {
       return;
     }
 
+    // 낙관적 업데이트에 필요한 임시 변수
+    let tempId;
+    let prevNote;
+
     try {
       setLoading(prev => ({ ...prev, save: true }));
       setError(null);
 
       if (selectedNoteId === null) {
         // add
+        tempId = crypto.randomUUID();
+        const optimisticNote = { ...draftNote, id: tempId };
+
+        // 먼저 반영
+        setNotes(prev => [...prev, optimisticNote]);
+
+        // 서버 결과로 교체
         const created = await createNote(draftNote);
-        setNotes(prev => [...prev, created]);
+        setNotes(prev =>
+          prev.map(note => (note.id === tempId ? created : note)),
+        );
       } else {
         // update
-        const updated = await updateNote(draftNote);
-        setNotes(prev =>
-          prev.map(note => (note.id === updated.id ? updated : note)),
-        );
+
+        // 먼저 반영
+        setNotes(prev => {
+          prevNote = prev.find(note => note.id === draftNote.id);
+          return prev.map(note =>
+            note.id === draftNote.id ? draftNote : note,
+          );
+        });
+
+        await updateNote(draftNote);
       }
 
       setSelectedNoteId(null);
       setDraftNote(null);
     } catch (err) {
-      setError(err.message);
+      // 롤백
+      if (selectedNoteId === null) {
+        setNotes(prev => prev.filter(note => note.id !== tempId));
+      } else if (prevNote) {
+        setNotes(prev =>
+          prev.map(note => (note.id === prevNote.id ? prevNote : note)),
+        );
+      }
+      setError('저장에 실패했습니다. 다시 시도해주세요.');
     } finally {
       setLoading(prev => ({ ...prev, save: false }));
     }
@@ -114,17 +141,27 @@ export default function NotePage() {
 
   // stale state 방지 위해 함수형 업데이트 적용
   const handleDeleteNote = async () => {
+    // 낙관적 업데이트 위해 따로 저장
+    let prevNotes;
+
     try {
       setLoading(prev => ({ ...prev, delete: true }));
       setError(null);
 
+      // 먼저 삭제
+      setNotes(prev => {
+        prevNotes = prev;
+        return prev.filter(note => note.id !== selectedNoteId);
+      });
+
       await deleteNote(selectedNoteId);
-      setNotes(prev => prev.filter(note => note.id !== selectedNoteId));
 
       setSelectedNoteId(null);
       setDraftNote(null);
     } catch (err) {
-      setError(err.message);
+      // 롤백
+      setNotes(prevNotes);
+      setError('삭제에 실패했습니다. 다시 시도해주세요.');
     } finally {
       setLoading(prev => ({ ...prev, delete: false }));
     }

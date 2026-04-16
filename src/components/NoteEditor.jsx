@@ -44,7 +44,7 @@ export default function NoteEditor({
       ></textarea>
       <footer>
         <button disabled={loading.save} onClick={handleSave}>
-          {loading.save ? '저장 중...' : '저장'}
+          {loading.save ? '동기화 중...' : '저장'}
         </button>
         <button type='button' disabled={loading.delete} onClick={onDeleteNote}>
           {loading.delete ? '삭제 중...' : '삭제'}
