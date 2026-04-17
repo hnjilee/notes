@@ -24,8 +24,8 @@ export async function createNote(note) {
   };
   mockNotes.push(newNote);
 
-  return newNote;
-  // throw new Error('failed to save data');
+  // return newNote;
+  throw new Error('failed to save data');
 }
 
 export async function updateNote(updatedNote) {
@@ -43,8 +43,8 @@ export async function updateNote(updatedNote) {
     note.id === updatedNote.id ? updatedNote : note,
   );
 
-  return updatedNote;
-  // throw new Error('failed to update data');
+  // return updatedNote;
+  throw new Error('failed to update data');
 }
 
 export async function deleteNote(id) {
@@ -60,8 +60,8 @@ export async function deleteNote(id) {
 
   mockNotes = mockNotes.filter(note => note.id !== id);
 
-  return id;
-  // throw new Error('failed to delete data');
+  // return id;
+  throw new Error('failed to delete data');
 }
 
 // 로딩 UI 테스트 목적

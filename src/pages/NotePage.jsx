@@ -15,25 +15,44 @@ export default function NotePage() {
     save: false,
     delete: false,
   });
-  const [error, setError] = useState(null);
+  // 명확한 UX 위해 에러 발생 범위별로 상태 분리
+  const [error, setError] = useState({
+    global: null,
+    form: null,
+  });
+  // 재실행 경로 제공 위해 마지막 실패 작업 저장 (함수 참조)
+  const [retryAction, setRetryAction] = useState(null);
 
   const didFetch = useRef(false);
 
+  // 특정 액션 X → 페이지 전체에 영향
+  // retryAction X → 별도의 fetch 함수로 분리해서 재요청
+  const fetchNotes = async () => {
+    try {
+      setLoading(prev => ({ ...prev, fetch: true }));
+      setError(prev => ({ ...prev, global: null }));
+
+      const notes = await getNotes();
+      setNotes(notes);
+    } catch (err) {
+      setError(prev => ({
+        ...prev,
+        global: '노트를 불러오는 데 실패했습니다. 다시 시도해주세요.',
+      }));
+    } finally {
+      setLoading(prev => ({ ...prev, fetch: false }));
+    }
+  };
+
   // mount 시 한 번만 호출
   useEffect(() => {
-    setLoading(prev => ({ ...prev, fetch: true }));
-    setError(null);
-
     // 개발 시 StrictMode로 인한 API 중복 호출 때문에
     // 데이터 요청 성공과 에러 발생이 동시에 생기는 상황 방지 위해
     // 임시로 추가
     if (didFetch.current) return;
     didFetch.current = true;
 
-    getNotes() //
-      .then(setNotes)
-      .catch(err => setError(err.message))
-      .finally(() => setLoading(prev => ({ ...prev, fetch: false })));
+    fetchNotes();
   }, []);
 
   // Page에서 계산해서 전달
@@ -81,7 +100,7 @@ export default function NotePage() {
 
     try {
       setLoading(prev => ({ ...prev, save: true }));
-      setError(null);
+      setError(prev => ({ ...prev, form: null }));
 
       if (selectedNoteId === null) {
         // add
@@ -112,6 +131,7 @@ export default function NotePage() {
 
       setSelectedNoteId(null);
       setDraftNote(null);
+      setRetryAction(null);
     } catch (err) {
       // 롤백
       if (selectedNoteId === null) {
@@ -121,7 +141,11 @@ export default function NotePage() {
           prev.map(note => (note.id === prevNote.id ? prevNote : note)),
         );
       }
-      setError('저장에 실패했습니다. 다시 시도해주세요.');
+      setError(prev => ({
+        ...prev,
+        form: '저장에 실패했습니다. 다시 시도해주세요.',
+      }));
+      setRetryAction(() => handleSaveNote);
     } finally {
       setLoading(prev => ({ ...prev, save: false }));
     }
@@ -146,7 +170,7 @@ export default function NotePage() {
 
     try {
       setLoading(prev => ({ ...prev, delete: true }));
-      setError(null);
+      setError(prev => ({ ...prev, form: null }));
 
       // 먼저 삭제
       setNotes(prev => {
@@ -158,19 +182,37 @@ export default function NotePage() {
 
       setSelectedNoteId(null);
       setDraftNote(null);
+      setRetryAction(null);
     } catch (err) {
       // 롤백
       setNotes(prevNotes);
-      setError('삭제에 실패했습니다. 다시 시도해주세요.');
+      setError(prev => ({
+        ...prev,
+        form: '삭제에 실패했습니다. 다시 시도해주세요.',
+      }));
+      setRetryAction(() => handleDeleteNote);
     } finally {
       setLoading(prev => ({ ...prev, delete: false }));
     }
   };
 
+  const handleRetry = () => {
+    if (!retryAction) return;
+    retryAction();
+  };
+
   return (
     <>
       {loading.fetch && <div className='overlay'>로딩 중...</div>}
-      {error && <p style={{ color: 'red' }}>{error}</p>}
+      {error.global && (
+        <div>
+          <p style={{ color: 'red' }}>{error.global}</p>
+          <button onClick={fetchNotes}>다시 시도</button>
+          <button onClick={() => setError(prev => ({ ...prev, global: null }))}>
+            닫기
+          </button>
+        </div>
+      )}
       <CategoryFilter
         categories={categories}
         selectedCategory={selectedCategory}
@@ -186,9 +228,11 @@ export default function NotePage() {
         <NoteEditor
           draftNote={draftNote}
           loading={loading}
+          error={error.form}
           onChangeDraft={handleChangeDraft}
           onSaveNote={handleSaveNote}
           onDeleteNote={handleDeleteNote}
+          onRetry={handleRetry}
         />
       )}
     </>

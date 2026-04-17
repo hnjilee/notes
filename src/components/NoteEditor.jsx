@@ -1,9 +1,11 @@
 export default function NoteEditor({
   draftNote,
   loading,
+  error,
   onChangeDraft,
   onSaveNote,
   onDeleteNote,
+  onRetry,
 }) {
   const handleChange = e => {
     const { name, value } = e.target;
@@ -17,6 +19,14 @@ export default function NoteEditor({
 
   return (
     <form>
+      {error && (
+        <div>
+          <p style={{ color: 'red' }}>{error}</p>
+          <button type='button' onClick={onRetry}>
+            다시 시도
+          </button>
+        </div>
+      )}
       <header>
         <select
           name='category'
