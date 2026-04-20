@@ -3,7 +3,6 @@ import { createNote, deleteNote, getNotes, updateNote } from '../api/notes.js';
 
 export default function useNotes() {
   const [notes, setNotes] = useState([]);
-  const [selectedNoteId, setSelectedNoteId] = useState(null);
   const [draftNote, setDraftNote] = useState(null);
   const [selectedCategory, setSelectedCategory] = useState('ALL');
   // 비동기 작업별 UI 반영 위해 작업 단위로 상태 분리
@@ -78,7 +77,6 @@ export default function useNotes() {
   /* 이벤트 처리 함수 */
 
   const handleSelectNote = id => {
-    setSelectedNoteId(id);
     setDraftNote({ ...notes.find(note => note.id === id) });
     setError(prev => ({ ...prev, form: null }));
   };
@@ -105,7 +103,7 @@ export default function useNotes() {
       setLoading(prev => ({ ...prev, save: true }));
       setError(prev => ({ ...prev, form: null }));
 
-      if (selectedNoteId === null) {
+      if (draftNote.id === undefined) {
         // add
 
         // 먼저 반영
@@ -132,12 +130,11 @@ export default function useNotes() {
         await updateNote(draftNote);
       }
 
-      setSelectedNoteId(null);
       setDraftNote(null);
       setRetryAction(null);
     } catch (err) {
       // 롤백
-      if (selectedNoteId === null) {
+      if (draftNote.id === undefined) {
         setNotes(prev => prev.filter(note => note.id !== tempId));
       } else {
         setNotes(prev =>
@@ -157,9 +154,6 @@ export default function useNotes() {
   };
 
   const handleAddNote = () => {
-    // Save 로직과 일관성 유지
-    setSelectedNoteId(null);
-
     // id 생성은 API에서 담당
     setDraftNote({
       category: '',
@@ -181,12 +175,11 @@ export default function useNotes() {
       // 먼저 삭제
       setNotes(prev => {
         prevNotes = prev;
-        return prev.filter(note => note.id !== selectedNoteId);
+        return prev.filter(note => note.id !== draftNote.id);
       });
 
-      await deleteNote(selectedNoteId);
+      await deleteNote(draftNote.id);
 
-      setSelectedNoteId(null);
       setDraftNote(null);
       setRetryAction(null);
     } catch (err) {
@@ -214,7 +207,6 @@ export default function useNotes() {
 
   return {
     draftNote,
-    selectedNoteId,
     selectedCategory,
     loading,
     error,
