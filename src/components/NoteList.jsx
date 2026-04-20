@@ -1,9 +1,4 @@
-export default function NoteList({
-  notes,
-  selectedNoteId,
-  onSelectNote,
-  onClickAddBtn,
-}) {
+export default function NoteList({ notes, onSelectNote, onClickAddBtn }) {
   return (
     <>
       <header>
