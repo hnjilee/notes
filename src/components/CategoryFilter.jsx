@@ -1,19 +1,17 @@
-export default function CategoryFilter({
-  categories,
-  selectedCategory,
-  onChangeCategory,
-}) {
+import { CATEGORY } from '../constants/category.js';
+
+export default function CategoryFilter({ selectedCategory, onChangeCategory }) {
   return (
     <>
       <h1>카테고리</h1>
       <ul>
-        {categories.map(category => (
+        {Object.values(CATEGORY).map(category => (
           <li
-            key={category}
-            onClick={() => onChangeCategory(category)}
-            className={selectedCategory === category ? 'active' : ''}
+            key={category.value}
+            onClick={() => onChangeCategory(category.value)}
+            className={selectedCategory === category.value ? 'active' : ''}
           >
-            {category}
+            {category.label}
           </li>
         ))}
       </ul>

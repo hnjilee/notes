@@ -1,10 +1,11 @@
 import { useEffect, useState, useRef } from 'react';
 import { createNote, deleteNote, getNotes, updateNote } from '../api/notes.js';
+import { CATEGORY } from '../constants/category.js';
 
 export default function useNotes() {
   const [notes, setNotes] = useState([]);
   const [draftNote, setDraftNote] = useState(null);
-  const [selectedCategory, setSelectedCategory] = useState('ALL');
+  const [selectedCategory, setSelectedCategory] = useState(CATEGORY.ALL.value);
   // 비동기 작업별 UI 반영 위해 작업 단위로 상태 분리
   const [loading, setLoading] = useState({
     fetch: false,
@@ -58,21 +59,9 @@ export default function useNotes() {
 
   // Page(useNotes)에서 계산해서 전달 → List는 "렌더링 책임만"
   const filteredNotes = notes.filter(note => {
-    if (selectedCategory === 'ALL') return true;
+    if (selectedCategory === CATEGORY.ALL.value) return true;
     return note.category === selectedCategory;
   });
-
-  // 하드코딩 제거 위해 notes로부터 동적으로 생성
-  // 빈 값 포함되지 않도록 필터링 추가 (데이터 오염 시 UI도 망가짐)
-  // 'ALL'은 항상 포함 (데이터 X, 별도의 제어값)
-  const categories = Array.from(
-    new Set([
-      'ALL',
-      ...notes //
-        .map(note => note.category)
-        .filter(category => category !== ''),
-    ]),
-  );
 
   /* 이벤트 처리 함수 */
 
@@ -211,7 +200,6 @@ export default function useNotes() {
     loading,
     error,
     filteredNotes,
-    categories,
 
     fetchNotes,
     setSelectedCategory,

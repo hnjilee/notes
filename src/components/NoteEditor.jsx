@@ -1,3 +1,5 @@
+import { CATEGORY } from '../constants/category.js';
+
 export default function NoteEditor({
   draftNote,
   loading,
@@ -34,9 +36,11 @@ export default function NoteEditor({
           onChange={handleChange}
         >
           <option value=''>카테고리</option>
-          <option value='work'>업무</option>
-          <option value='personal'>개인</option>
-          <option value='etc'>기타</option>
+          <option value={CATEGORY.WORK.value}>{CATEGORY.WORK.label}</option>
+          <option value={CATEGORY.PERSONAL.value}>
+            {CATEGORY.PERSONAL.label}
+          </option>
+          <option value={CATEGORY.ETC.value}>{CATEGORY.ETC.label}</option>
         </select>
         <input
           type='text'

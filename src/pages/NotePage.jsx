@@ -6,7 +6,6 @@ import useNotes from '../hooks/useNotes.js';
 export default function NotePage() {
   const {
     filteredNotes,
-    categories,
     draftNote,
     selectedCategory,
     loading,
@@ -34,7 +33,6 @@ export default function NotePage() {
         </div>
       )}
       <CategoryFilter
-        categories={categories}
         selectedCategory={selectedCategory}
         onChangeCategory={setSelectedCategory}
       />
