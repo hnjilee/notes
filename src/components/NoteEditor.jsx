@@ -61,7 +61,7 @@ export default function NoteEditor({
           {loading.save ? '동기화 중...' : '저장'}
         </button>
         <button type='button' disabled={loading.delete} onClick={onDeleteNote}>
-          {loading.delete ? '삭제 중...' : '삭제'}
+          {loading.delete ? '동기화 중...' : '삭제'}
         </button>
       </footer>
     </form>

@@ -24,7 +24,7 @@ export default function NotePage() {
 
   return (
     <>
-      {loading.fetch && <div className='overlay'>로딩 중...</div>}
+      {loading.fetch && <div className='overlay'>불러오는 중...</div>}
       {error.global && (
         <div>
           <p style={{ color: 'red' }}>{error.global}</p>

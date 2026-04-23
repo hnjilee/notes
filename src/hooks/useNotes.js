@@ -1,6 +1,7 @@
 import { useEffect, useState, useRef } from 'react';
 import { createNote, deleteNote, getNotes, updateNote } from '../api/notes.js';
 import { CATEGORY } from '../constants/category.js';
+import { runWithMinDelay } from '../utils/async.js';
 
 export default function useNotes() {
   const [notes, setNotes] = useState([]);
@@ -29,7 +30,7 @@ export default function useNotes() {
       setLoading(prev => ({ ...prev, fetch: true }));
       setError(prev => ({ ...prev, global: null }));
 
-      const notes = await getNotes();
+      const notes = await runWithMinDelay(() => getNotes(), 500);
       setNotes(notes);
     } catch (err) {
       setError(prev => ({
@@ -101,7 +102,7 @@ export default function useNotes() {
         setNotes(prev => [...prev, optimisticNote]);
 
         // 서버 결과로 교체
-        const created = await createNote(draftNote);
+        const created = await runWithMinDelay(() => createNote(draftNote));
         setNotes(prev =>
           prev.map(note => (note.id === tempId ? created : note)),
         );
@@ -116,7 +117,7 @@ export default function useNotes() {
           );
         });
 
-        await updateNote(draftNote);
+        await runWithMinDelay(() => updateNote(draftNote));
       }
 
       setDraftNote(null);
@@ -167,7 +168,7 @@ export default function useNotes() {
         return prev.filter(note => note.id !== draftNote.id);
       });
 
-      await deleteNote(draftNote.id);
+      await runWithMinDelay(() => deleteNote(draftNote.id));
 
       setDraftNote(null);
       setRetryAction(null);
