@@ -22,8 +22,8 @@ export default function NoteEditor({
   return (
     <form>
       {error && (
-        <div>
-          <p style={{ color: 'red' }}>{error}</p>
+        <div className='error'>
+          <p>{error}</p>
           <button type='button' onClick={onRetry}>
             다시 시도
           </button>

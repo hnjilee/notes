@@ -9,7 +9,7 @@ export default function CategoryFilter({ selectedCategory, onChangeCategory }) {
           <li
             key={category.value}
             onClick={() => onChangeCategory(category.value)}
-            className={selectedCategory === category.value ? 'active' : ''}
+            className={`category-item ${selectedCategory === category.value ? 'active' : ''}`}
           >
             {category.label}
           </li>
